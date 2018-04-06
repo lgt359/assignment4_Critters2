@@ -1,28 +1,28 @@
 package assignment5;
 
 public class Craig extends Critter {
-	
+
 	@Override
 	public String toString() { return "C"; }
-	
+
 	private static final int GENE_TOTAL = 24;
 	private int[] genes = new int[8];
 	private int dir;
-	
+
 	public Craig() {
 		for (int k = 0; k < 8; k += 1) {
 			genes[k] = GENE_TOTAL / 8;
 		}
 		dir = Critter.getRandomInt(8);
 	}
-	
+
 	public boolean fight(String not_used) { return true; }
 
 	@Override
 	public void doTimeStep() {
 		/* take one step forward */
 		walk(dir);
-		
+
 		if (getEnergy() > 150) {
 			Craig child = new Craig();
 			for (int k = 0; k < 8; k += 1) {
@@ -46,7 +46,7 @@ public class Craig extends Critter {
 			turn = turn + 1;
 		}
 		assert(turn < 8);
-		
+
 		dir = (dir + turn) % 8;
 	}
 
@@ -62,19 +62,26 @@ public class Craig extends Critter {
 			total_back += c.genes[4];
 			total_left += c.genes[5] + c.genes[6] + c.genes[7];
 		}
+		/*
 		System.out.print("" + craigs.size() + " total Craigs    ");
 		System.out.print("" + total_straight / (GENE_TOTAL * 0.01 * craigs.size()) + "% straight   ");
 		System.out.print("" + total_back / (GENE_TOTAL * 0.01 * craigs.size()) + "% back   ");
 		System.out.print("" + total_right / (GENE_TOTAL * 0.01 * craigs.size()) + "% right   ");
 		System.out.print("" + total_left / (GENE_TOTAL * 0.01 * craigs.size()) + "% left   ");
-		System.out.println();
-		return null;
+		System.out.println();*/
+
+		String stats = "" + craigs.size() + " total Craigs    " + total_straight / (GENE_TOTAL * 0.01 * craigs.size()) + "% straight   " + total_back / (GENE_TOTAL * 0.01 * craigs.size()) + "% back   " + total_right / (GENE_TOTAL * 0.01 * craigs.size()) + "% right   " + total_left / (GENE_TOTAL * 0.01 * craigs.size()) + "% left   ";
+		return stats;
 	}
-	
+
 	@Override
 	public CritterShape viewShape() { return CritterShape.SQUARE; }
 
 	@Override
 	public javafx.scene.paint.Color viewOutlineColor() { return javafx.scene.paint.Color.BLUE; }
+
+	@Override
+	public javafx.scene.paint.Color viewColor() { return javafx.scene.paint.Color.BLUE; }
+
 
 }

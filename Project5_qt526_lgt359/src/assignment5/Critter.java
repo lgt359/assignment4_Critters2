@@ -1,7 +1,21 @@
+/* CRITTERS Critter.java
+ * EE422C Project 5 submission by
+ * Lorrie Tria
+ * LGT359
+ * Quoc Truong
+ * QT526
+ *
+ * Spring 2018
+ */
+
 package assignment5;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.*;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,27 +28,27 @@ public abstract class Critter {
 		DIAMOND,
 		STAR
 	}
-	
+
 	/* the default color is white, which I hope makes critters invisible by default
 	 * If you change the background color of your View component, then update the default
-	 * color to be the same as you background 
-	 * 
-	 * critters must override at least one of the following three methods, it is not 
+	 * color to be the same as you background
+	 *
+	 * critters must override at least one of the following three methods, it is not
 	 * proper for critters to remain invisible in the view
-	 * 
-	 * If a critter only overrides the outline color, then it will look like a non-filled 
-	 * shape, at least, that's the intent. You can edit these default methods however you 
-	 * need to, but please preserve that intent as you implement them. 
+	 *
+	 * If a critter only overrides the outline color, then it will look like a non-filled
+	 * shape, at least, that's the intent. You can edit these default methods however you
+	 * need to, but please preserve that intent as you implement them.
 	 */
-	public javafx.scene.paint.Color viewColor() { 
-		return javafx.scene.paint.Color.WHITE; 
+	public javafx.scene.paint.Color viewColor() {
+		return javafx.scene.paint.Color.WHITE;
 	}
-	
+
 	public javafx.scene.paint.Color viewOutlineColor() { return viewColor(); }
 	public javafx.scene.paint.Color viewFillColor() { return viewColor(); }
-	
-	public abstract CritterShape viewShape(); 
-	
+
+	public abstract CritterShape viewShape();
+
 	private static String myPackage;
 	private	static List<Critter> population = new java.util.ArrayList<Critter>();
 	private static List<Critter> babies = new java.util.ArrayList<Critter>();
@@ -43,8 +57,14 @@ public abstract class Critter {
 	static {
 		myPackage = Critter.class.getPackage().toString().split(" ")[1];
 	}
-	
+
+	/** Examines a location to see if a critter lies at that coordinate
+	 * @param direction direction to look, 0-7
+	 * @param steps false is 1 step, true is 2 steps
+	 * @return returns the Critter.toString() if critter is at location, null if not
+	 */
 	protected final String look(int direction, boolean steps) {
+		this.energy -= Params.look_energy_cost;
 		int newX = this.x_coord;
 		int newY = this.y_coord;
 		int number_steps;
@@ -130,21 +150,21 @@ public abstract class Critter {
 		// No critter in spot, return null
 		return null;
 	}
-	
+
 	/* rest is unchanged from Project 4 */
 
 	private static java.util.Random rand = new java.util.Random();
 	public static int getRandomInt(int max) {
 		return rand.nextInt(max);
 	}
-	
+
 	public static void setSeed(long new_seed) {
 		rand = new java.util.Random(new_seed);
 	}
-	
+
 	/* a one-character long string that visually depicts your critter in the ASCII interface */
 	public String toString() { return ""; }
-	
+
 	private int energy = 0;
 	protected int getEnergy() { return energy; }
 
@@ -489,8 +509,18 @@ public abstract class Critter {
 					}
 
 					case STAR: {
-						Polygon s = new Polygon();
-
+						Polygon t1 = new Polygon();
+						Polygon t2 = new Polygon();
+						t1.setFill(c.viewColor());
+						t1.setStroke(c.viewOutlineColor());
+						t2.setFill(c.viewColor());
+						t2.setStroke(c.viewOutlineColor());
+						double tbase = pane.getWidth()/ Params.world_width;
+						double theight = pane.getHeight()/ Params.world_height;
+						t1.getPoints().addAll(tbase/2, 0.0, tbase, 2*theight/3, 0.0, 2*theight/3);
+						t2.getPoints().addAll(0.0, (theight)/3.0, tbase, (theight)/3.0, tbase/2.0, theight);
+						pane.add(t1, c.x_coord, c.y_coord);
+						pane.add(t2, c.x_coord, c.y_coord);
 						break;
 					}
 
@@ -506,10 +536,22 @@ public abstract class Critter {
 					}
 
 					case DIAMOND: {
+						Polygon diamond = new Polygon();
+						double dbase = pane.getWidth()/ Params.world_width;
+						double dheight = pane.getHeight()/ Params.world_height;
+						diamond.getPoints().addAll(dbase/2, 0.0, dbase, dheight/2, dbase/2, dheight, 0.0, dheight/2);
+						diamond.setFill(c.viewColor());
+						pane.add(diamond, c.x_coord, c.y_coord);
 						break;
 					}
 
 					case TRIANGLE: {
+						Polygon triangle = new Polygon();
+						double base = pane.getWidth()/ Params.world_width;
+						double height = pane.getHeight()/ Params.world_height;
+						triangle.getPoints().addAll(0.0, height, base, height, base/2, 0.0);
+						triangle.setFill(c.viewColor());
+						pane.add(triangle, c.x_coord, c.y_coord);
 						break;
 					}
 				}
@@ -574,15 +616,24 @@ public abstract class Critter {
 
 		return result;
 	}
-	
+
+	/** Returns a string of how many given critters there are
+	 * @param critters List of critters
+	 * @return Returns string of statistics of critters
+	 */
 	public static String runStats(List<Critter> critters) {
-		return null;
+		if(critters.size() != 0) {
+			String name = critters.get(0).getClass().getSimpleName();
+			String stats = ("There are " + critters.size() + " " + name + "(s) in the world!");
+			return stats;
+		}
+		return ("There are none of these critters alive!");
 	}
-	
-	/* the TestCritter class allows some critters to "cheat". If you want to 
+
+	/* the TestCritter class allows some critters to "cheat". If you want to
 	 * create tests of your Critter model, you can create subclasses of this class
-	 * and then use the setter functions contained here. 
-	 * 
+	 * and then use the setter functions contained here.
+	 *
 	 * NOTE: you must make sure thath the setter functions work with your implementation
 	 * of Critter. That means, if you're recording the positions of your critters
 	 * using some sort of external grid or some other data structure in addition
@@ -593,23 +644,23 @@ public abstract class Critter {
 		protected void setEnergy(int new_energy_value) {
 			super.energy = new_energy_value;
 		}
-		
+
 		protected void setX_coord(int new_x_coord) {
 			super.x_coord = new_x_coord;
 		}
-		
+
 		protected void setY_coord(int new_y_coord) {
 			super.y_coord = new_y_coord;
 		}
-		
+
 		protected int getX_coord() {
 			return super.x_coord;
 		}
-		
+
 		protected int getY_coord() {
 			return super.y_coord;
 		}
-		
+
 
 		/*
 		 * This method getPopulation has to be modified by you if you are not using the population
@@ -619,18 +670,18 @@ public abstract class Critter {
 		protected static List<Critter> getPopulation() {
 			return population;
 		}
-		
+
 		/*
 		 * This method getBabies has to be modified by you if you are not using the babies
 		 * ArrayList that has been provided in the starter code.  In any case, it has to be
-		 * implemented for grading tests to work.  Babies should be added to the general population 
+		 * implemented for grading tests to work.  Babies should be added to the general population
 		 * at either the beginning OR the end of every timestep.
 		 */
 		protected static List<Critter> getBabies() {
 			return babies;
 		}
 	}
-	
+
 	/**
 	 * Clear the world of all critters, dead and alive
 	 */
